@@ -21,9 +21,15 @@ public class TaskServices : ITaskService
         return task;
     }
 
-    public void DeleteTask(int id)
+    public async Task DeleteTask(int id)
     {
-        throw new NotImplementedException();
+        var task = await _context.Tasks.FindAsync(id);
+        if(task == null){
+            throw new KeyNotFoundException($"Task with id {id} not found");
+        }
+        _context.Tasks.Remove(task);
+        await _context.SaveChangesAsync();
+        
     }
 
     public async Task<TaskItem?> GetTask(int id)
