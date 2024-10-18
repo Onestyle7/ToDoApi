@@ -39,5 +39,17 @@ public class TasksController : ControllerBase
         var newTask = await _taskService.CreateTask(task);
         return CreatedAtAction(nameof(GetTask), new { id = newTask.Id }, newTask);
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTask(int id){
+        try
+        {
+            await _taskService.DeleteTask(id);
+            return Ok("Task deleted successfully!");
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }
 }
