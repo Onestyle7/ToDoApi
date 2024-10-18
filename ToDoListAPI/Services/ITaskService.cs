@@ -9,6 +9,6 @@ public interface ITaskService
     Task<TaskItem?> GetTask(int id);
     Task<TaskItem> CreateTask(TaskItem task);
     Task<TaskItem> UpdateTask(int id, TaskItem task);
-    void DeleteTask(int id);
+    Task DeleteTask(int id);
 
 }
