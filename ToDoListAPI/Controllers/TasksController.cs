@@ -51,5 +51,23 @@ public class TasksController : ControllerBase
             return NotFound(ex.Message);
         }
     }
+    [HttpPut("edit/{id}")]
+    public async Task<ActionResult<TaskItem>> EditTask(int id, TaskItem task){
+        if(id != task.Id){
+            return BadRequest("There is no task with the given id");
+        }
+        if(task == null){
+            return BadRequest("Task is null");
+        }
+       try{
+            var UpdateTask = await _taskService.EditTask(id, task);
+            if(UpdateTask == null){
+                return NotFound();
+            }
+            return Ok(UpdateTask);
+       } catch (Exception ex){
+            Console.WriteLine(ex.Message);
+            return StatusCode(500, "An error occured while updating the task");
+    }
 }
-}
+}}

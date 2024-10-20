@@ -42,8 +42,10 @@ public class TaskServices : ITaskService
         return await _context.Tasks.ToListAsync();
     }
 
-    public Task<TaskItem> UpdateTask(int id, TaskItem task)
+    public async Task<TaskItem> EditTask(int id, TaskItem task)
     {
-        throw new NotImplementedException();
+        _context.Entry(task).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return task;
     }
 }
