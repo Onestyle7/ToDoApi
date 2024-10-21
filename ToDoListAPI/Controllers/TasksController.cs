@@ -17,10 +17,36 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("All")]
-    public async Task<IEnumerable<TaskItem>> GetTasks()
+    public async Task<IEnumerable<TaskItem>> GetTasks(
+        bool? isCompleted = null,
+        Priority? priority = null,
+        DateTime? dueDate = null,
+        string sortBy = "Title",
+        bool descending = false
+    )
     {
-        
-        return await _taskService.GetTasks();
+        IEnumerable<TaskItem> tasks = await _taskService.GetTasks();
+
+        if(isCompleted.HasValue)
+        {
+            tasks = tasks.Where(t => t.IsDone == isCompleted.Value);
+        }
+        if(priority.HasValue)
+        {
+            tasks = tasks.Where(t => t.PriorityLevel == priority.Value);
+        }
+        if(dueDate.HasValue)
+        {
+            tasks = tasks.Where(t => t.DueDate == dueDate.Value);
+        }
+        tasks = sortBy switch
+        {
+            "title" => descending ? tasks.OrderByDescending(t => t.Title) : tasks.OrderBy(t => t.Title),
+            "priority" => descending ? tasks.OrderByDescending(t => t.PriorityLevel) : tasks.OrderBy(t => t.PriorityLevel),
+            "dueDate" => descending ? tasks.OrderByDescending(t => t.DueDate) : tasks.OrderBy(t => t.DueDate),
+            _ => tasks
+        };
+        return tasks.ToList();
     }
 
     [HttpGet("{id}")]
