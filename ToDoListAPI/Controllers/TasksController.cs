@@ -19,6 +19,7 @@ public class TasksController : ControllerBase
     [HttpGet("All")]
     public async Task<IEnumerable<TaskItem>> GetTasks()
     {
+        
         return await _taskService.GetTasks();
     }
 
@@ -34,10 +35,16 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<ActionResult<TaskItem>> AddTask(TaskItem task)
+    public async Task<ActionResult<TaskItem>> AddTask([FromBody] TaskItem task)
     {
+        if(!ModelState.IsValid) 
+        {
+            return BadRequest(ModelState);
+        }
         var newTask = await _taskService.CreateTask(task);
-        return CreatedAtAction(nameof(GetTask), new { id = newTask.Id }, newTask);
+        return Ok(newTask);
+
+
     }
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTask(int id){
@@ -46,9 +53,10 @@ public class TasksController : ControllerBase
             await _taskService.DeleteTask(id);
             return Ok("Task deleted successfully!");
         }
-        catch (KeyNotFoundException ex)
+        catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            Console.WriteLine(ex.Message);
+            return StatusCode(500, "An error occurred while deleting the task");
         }
     }
     [HttpPut("edit/{id}")]
@@ -56,8 +64,8 @@ public class TasksController : ControllerBase
         if(id != task.Id){
             return BadRequest("There is no task with the given id");
         }
-        if(task == null){
-            return BadRequest("Task is null");
+        if(!ModelState.IsValid){
+            return BadRequest(ModelState);
         }
        try{
             var UpdateTask = await _taskService.EditTask(id, task);
