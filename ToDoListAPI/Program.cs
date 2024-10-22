@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoListAPI.Data;
+using ToDoListAPI.Repositories;
 using ToDoListAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<ITaskService, TaskServices>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 var app = builder.Build();
 

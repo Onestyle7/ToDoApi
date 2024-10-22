@@ -2,50 +2,41 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using ToDoListAPI.Data;
 using ToDoListAPI.Models;
+using ToDoListAPI.Repositories;
 
 namespace ToDoListAPI.Services;
 
 public class TaskServices : ITaskService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ITaskRepository _repository;
 
-    public TaskServices(ApplicationDbContext context)
+    public TaskServices(ITaskRepository repository)
     {
-        _context = context;
+        _repository = repository;
     }
         
     public async Task<TaskItem> CreateTask(TaskItem task)
     {
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
-        return task;
+        return await _repository.CreateTask(task);
     }
 
     public async Task DeleteTask(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
-        if(task == null){
-            throw new KeyNotFoundException($"Task with id {id} not found");
-        }
-        _context.Tasks.Remove(task);
-        await _context.SaveChangesAsync();
-        
+       await _repository.DeleteTask(id);
     }
 
     public async Task<TaskItem?> GetTask(int id)
     {
-        return await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+        return await _repository.GetTask(id);
     }
 
     public async Task<List<TaskItem>> GetTasks()
     {
-        return await _context.Tasks.ToListAsync();
+        return await _repository.GetTasks();
     }
 
     public async Task<TaskItem> EditTask(int id, TaskItem task)
     {
-        _context.Entry(task).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return task;
+       return await _repository.EditTask(id, task);
     }
 }
