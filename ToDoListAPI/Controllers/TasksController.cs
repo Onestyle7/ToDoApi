@@ -1,6 +1,8 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ToDoListAPI.Data;
+using ToDoListAPI.DTOs;
 using ToDoListAPI.Models;
 using ToDoListAPI.Services;
 
@@ -11,13 +13,15 @@ namespace ToDoListAPI.Controllers
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
-    public TasksController(ITaskService taskService)
+    private readonly IMapper _mapper;
+    public TasksController(ITaskService taskService, IMapper mapper)
     {
         _taskService = taskService;
+        _mapper = mapper;
     }
 
     [HttpGet("All")]
-    public async Task<IEnumerable<TaskItem>> GetTasks(
+    public async Task<IEnumerable<TaskDto>> GetTasks(
         bool? isCompleted = null,
         Priority? priority = null,
         DateTime? dueDate = null,
@@ -46,29 +50,36 @@ public class TasksController : ControllerBase
             "dueDate" => descending ? tasks.OrderByDescending(t => t.DueDate) : tasks.OrderBy(t => t.DueDate),
             _ => tasks
         };
-        return tasks.ToList();
+
+        var taskDtos = _mapper.Map<IEnumerable<TaskDto>>(tasks);
+
+        return taskDtos.ToList();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TaskItem>> GetTask(int id)
+    public async Task<ActionResult<TaskDto>> GetTask(int id)
     {
         var task = await _taskService.GetTask(id);
         if (task == null)
         {
             return NotFound();
         }
-        return task;
+        var taskDto = _mapper.Map<TaskDto>(task);
+        return Ok(taskDto);
     }
 
-    [HttpPost("add")]
-    public async Task<ActionResult<TaskItem>> AddTask([FromBody] TaskItem task)
+    [HttpPost("Add")]
+    public async Task<ActionResult<TaskDto>> AddTask([FromBody] CreateTaskDto createTaskDto)
     {
         if(!ModelState.IsValid) 
         {
             return BadRequest(ModelState);
         }
+        var task = _mapper.Map<TaskItem>(createTaskDto);
         var newTask = await _taskService.CreateTask(task);
-        return Ok(newTask);
+
+        var taskDto = _mapper.Map<TaskDto>(newTask);
+        return CreatedAtAction(nameof(GetTask), new { id = taskDto.Id }, taskDto);
 
 
     }
@@ -85,23 +96,27 @@ public class TasksController : ControllerBase
             return StatusCode(500, "An error occurred while deleting the task");
         }
     }
-    [HttpPut("edit/{id}")]
-    public async Task<ActionResult<TaskItem>> EditTask(int id, TaskItem task){
-        if(id != task.Id){
+    [HttpPut("Edit/{id}")]
+    public async Task<ActionResult<TaskDto>> EditTask(int id,[FromBody] UpdateTaskDto updateTaskDto){
+        if(id != updateTaskDto.Id){
             return BadRequest("There is no task with the given id");
         }
         if(!ModelState.IsValid){
             return BadRequest(ModelState);
         }
        try{
-            var UpdateTask = await _taskService.EditTask(id, task);
-            if(UpdateTask == null){
-                return NotFound();
-            }
-            return Ok(UpdateTask);
-       } catch (Exception ex){
-            Console.WriteLine(ex.Message);
-            return StatusCode(500, "An error occured while updating the task");
-    }
+           var task = await _taskService.GetTask(id);
+           if(task == null){
+               return NotFound();
+           }
+
+           _mapper.Map(updateTaskDto, task);
+           var updatedTask = await _taskService.EditTask(id, task);
+
+           var taskDto = _mapper.Map<TaskDto>(updatedTask);
+           return Ok(taskDto);
+    }catch(Exception ex){
+        Console.WriteLine(ex.Message);
+        return StatusCode(500, "An error occurred while updating the task");
 }
-}}
+}}}
