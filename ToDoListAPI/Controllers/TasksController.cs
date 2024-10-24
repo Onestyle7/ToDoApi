@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ToDoListAPI.Data;
@@ -8,8 +9,9 @@ using ToDoListAPI.Services;
 
 namespace ToDoListAPI.Controllers
 {
-    [Route("api/[controller]")]
+[Authorize]
 [ApiController]
+[Route("api/[controller]")]
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
