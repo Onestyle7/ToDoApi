@@ -38,7 +38,9 @@ namespace ToDoListAPI.Controllers
             var user = new User
             {
                 Username = request.Username,
-                Password = request.Password  // Nie ma haszowania
+                Email = request.Email,
+                Password = request.Password,  // Nie ma haszowania
+                Role = request.Role
             };
 
             _dbContext.Users.Add(user);
