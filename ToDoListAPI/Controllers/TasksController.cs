@@ -120,5 +120,7 @@ public class TasksController : ControllerBase
     }catch(Exception ex){
         Console.WriteLine(ex.Message);
         return StatusCode(500, "An error occurred while updating the task");
-}
-}}}
+        }
+    }
+   
+}}
