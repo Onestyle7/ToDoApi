@@ -34,7 +34,7 @@ namespace ToDoListAPI.Controllers
                 return BadRequest("User already exists");
             }
 
-            // Zapisujemy hasło w postaci zwykłego tekstu (plaintext)
+            
             var user = new User
             {
                 Username = request.Username,
