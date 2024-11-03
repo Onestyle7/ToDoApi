@@ -1,14 +1,37 @@
-import { ApiProvider } from "@reduxjs/toolkit/query/react";
-import axios from "axios";
+import axiosInstance from "./axiosConfig";
 
-const API_URL = "http://localhost:5287"
+interface TaskCreate {
+    title: string;
+    description?: string;
+    dueDate?: string;
+    priority: "Low" | "Medium" | "High";
+}
 
-export const login = async(email: string, password: string) =>{
-    const response = await axios.post(`${API_URL}/api/Auth/login`, {email, password});
+export const login = async (username: string, password: string) => {
+    const response = await axiosInstance.post("/api/Auth/login", { username, password });
     return response.data;
 };
 
-export const register = async(email: string, password: string) =>{
-    const response = await axios.post(`${API_URL}/api/Auth/register`, {email, password});
+export const register = async (username: string, email: string, password: string) => {
+    const response = await axiosInstance.post("/api/Auth/register", { username, email, password });
     return response.data;
-}
+};
+export const fetchProtectedData = async () => {
+    const response = await axiosInstance.get("/api/Tasks/All");
+    return response.data;
+};
+
+export const addTask = async (task: TaskCreate) => {
+    const response = await axiosInstance.post("/api/Tasks/Add", task);
+    return response.data;
+};
+
+export const deleteTask = async (id: number) => {
+    const response = await axiosInstance.delete(`/api/Tasks/${id}`);
+    return response.data;
+};
+
+export const updateTask = async (id: number, updatedTaskData: any) => {
+    const response = await axiosInstance.put(`/api/Tasks/Edit/${id}`, updatedTaskData);
+    return response.data;
+};
